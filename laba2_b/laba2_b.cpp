@@ -1,26 +1,26 @@
-// idblaba2_b.cpp : Определяет точку входа для приложения.
+// laba2_b.cpp : Определяет точку входа для приложения.
 //
 
 #include "framework.h"
-#include "idblaba2_b.h"
+#include "laba2_b.h"
 #include <vector>
 
 #define MAX_LOADSTRING 100
 
 using namespace std;
-
 // Глобальные переменные:
 HINSTANCE hInst;                                // текущий экземпляр
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
 
+
 class figure {
 public:
-    figure(){}
-    ~figure(){}
+    figure() {}
+    ~figure() {}
     virtual void paint(HDC hdc) = 0;
 };
-class Circle: public figure {
+class Circle : public figure {
 private:
     int centr_y{};
     int centr_x{};
@@ -61,8 +61,6 @@ public:
 
 vector <figure*> base;
 
-
-// Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -80,7 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_IDBLABA2B, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_LABA2B, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // Выполнить инициализацию приложения:
@@ -89,7 +87,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IDBLABA2B));
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABA2B));
 
     MSG msg;
 
@@ -124,10 +122,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_IDBLABA2B));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABA2B));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_IDBLABA2B);
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_LABA2B);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -172,6 +170,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - отправить сообщение о выходе и вернуться
 //
 //
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -179,9 +178,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE: {
         Circle circle(1000, 250, 150);
         rectangle rect(300, 300, 100, 200);
-        base.emplace_back(circle);
-        base.emplace_back(rect);
-        break;
+        base.emplace_back(new Circle (circle));
+        base.emplace_back(new rectangle (rect));
+        break; 
     }
     case WM_COMMAND:
         {
@@ -205,8 +204,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
-            for (figure element : base) {
-                element.paint(hdc);
+            for (figure* element : base) {
+                element->paint(hdc);
             }
             EndPaint(hWnd, &ps);
         }
