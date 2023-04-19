@@ -1,60 +1,68 @@
-﻿// laba2_b.cpp : Определяет точку входа для приложения.
+// idblaba2_b.cpp : Определяет точку входа для приложения.
 //
 
 #include "framework.h"
-#include "laba2_b.h"
+#include "idblaba2_b.h"
 #include <vector>
 
 #define MAX_LOADSTRING 100
 
 using namespace std;
+
 // Глобальные переменные:
 HINSTANCE hInst;                                // текущий экземпляр
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
 
-
-enum class type_figure {circle, rectangle};
-
-class figure{
+class figure {
+public:
+    figure(){}
+    ~figure(){}
+    virtual void paint(HDC hdc) = 0;
+};
+class Circle: public figure {
 private:
     int centr_y{};
     int centr_x{};
     int radius_length{};
+public:
+    Circle(const int& centr_x_pub, const int& centr_y_pub, const int& radius_length_pub) {
+        centr_x = centr_x_pub;
+        centr_y = centr_y_pub;
+        radius_length = radius_length_pub;
+    }
+    void paint(HDC hdc)  override {
+        HBRUSH hBrush;
+        hBrush = CreateSolidBrush(RGB(200, 0, 228));
+        SelectObject(hdc, hBrush);
+        Ellipse(hdc, centr_x + radius_length, centr_y + radius_length, centr_x - radius_length, centr_y - radius_length);
+    }
+};
+class rectangle : public figure {
+private:
     int rect_corner_x{};
     int rect_corner_y{};
     int rect_width{};
     int rect_height{};
-    type_figure type{};
 public:
-    figure(const int& centr_x_pub, const int& centr_y_pub, const int& radius_length_pub) {
-        centr_x = centr_x_pub;
-        centr_y = centr_y_pub;
-        radius_length = radius_length_pub;
-        type = type_figure::circle;
-    }
-    figure(const int& rect_corner_x_pub, const int& rect_corner_y_pub, const int& rect_width_pub, const int& rect_height_pub) {
+    rectangle(const int& rect_corner_x_pub, const int& rect_corner_y_pub, const int& rect_width_pub, const int& rect_height_pub) {
         rect_corner_x = rect_corner_x_pub;
         rect_corner_y = rect_corner_y_pub;
         rect_width = rect_width_pub;
         rect_height = rect_height_pub;
-        type = type_figure::rectangle;
     }
     void paint(HDC hdc) {
         HBRUSH hBrush;
-        hBrush = CreateSolidBrush(RGB(200, 100, 128));
+        hBrush = CreateSolidBrush(RGB(200, 0, 228));
         SelectObject(hdc, hBrush);
-        switch (type)
-        {
-        case type_figure::circle:
-            Ellipse(hdc, centr_x + radius_length, centr_y + radius_length, centr_x - radius_length, centr_y - radius_length );
-        case type_figure::rectangle:
-            Rectangle(hdc, rect_corner_x, rect_corner_y, rect_corner_x - rect_width, rect_corner_x - rect_height);
-        }
+        Rectangle(hdc, rect_corner_x, rect_corner_y, rect_corner_x - rect_width, rect_corner_x - rect_height);
     }
 };
-vector <figure> base;
 
+vector <figure*> base;
+
+
+// Отправить объявления функций, включенных в этот модуль кода:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -72,7 +80,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // Инициализация глобальных строк
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_LABA2B, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_IDBLABA2B, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // Выполнить инициализацию приложения:
@@ -81,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABA2B));
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_IDBLABA2B));
 
     MSG msg;
 
@@ -116,10 +124,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABA2B));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_IDBLABA2B));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_LABA2B);
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_IDBLABA2B);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -164,17 +172,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - отправить сообщение о выходе и вернуться
 //
 //
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_CREATE: {
-        figure circle(1000, 200, 100);
-        figure rectangle(300, 200, 100, 200);
-        base.push_back(figure(circle));
-        base.push_back(figure(rectangle));
-        break; 
+        Circle circle(1000, 250, 150);
+        rectangle rect(300, 300, 100, 200);
+        base.emplace_back(circle);
+        base.emplace_back(rect);
+        break;
     }
     case WM_COMMAND:
         {
