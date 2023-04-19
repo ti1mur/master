@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <typeinfo>
 #include <vector>
 using namespace std;
@@ -13,27 +13,45 @@ using namespace std;
 
 class Class1 {
 public:
-	Class1(){}
-	virtual ~Class1() {}
+	Class1() {}
+	virtual ~Class1() 
+	{
+		std::cout << "Class 1" << std::endl;
+	}
+	virtual Class1* clone() const{
+		return new Class1(*this);
+	}
 };
-class Class2: public Class1{
+class Class2 : public Class1 {
 public:
+	Class2* clone() const{
+		return new Class2(*this);
+	}
 	Class2() {}
-	~Class2() override {}
+	~Class2() 
+	{
+		std::cout << "Class 2" << std::endl;
+	}
 };
-class data_base{
+class data_base {
 private:
 	vector <Class1*> base;
 public:
+	data_base()
+	{
+		base.reserve(10);
+	}
 	void my_copy(const Class1 &obj) {
-		base.emplace_back(new Class1(obj));
+		base.emplace_back(obj.clone());
 	}
 	void type() const {
 		for (Class1* element : base) {
 			cout << typeid(element).name() << endl;
 		}
 	}
-	~data_base() {
+	~data_base() 
+	{
+		std::cout << "Delete copied classes" << std::endl;
 		for (Class1* element : base)
 		{
 			delete element;
@@ -43,11 +61,14 @@ public:
 
 int main() {
 	setlocale(LC_ALL, "Russian");
-	Class1 obj1;
-	Class2 obj2;
 	data_base basa;
-	basa.my_copy(obj1);
-	basa.my_copy(obj2);
+	{
+		Class1 obj1;
+		Class2 obj2;
+		basa.my_copy(obj1);
+		basa.my_copy(obj2);
+	}
+	std::cout << "delete local objects" << std::endl;
 	basa.type();
 	return 0;
 }
